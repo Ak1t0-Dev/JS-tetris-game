@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/1322d173d9.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="style.css">
+    <title>Login</title>
+</head>
+
+<body>
+    <main class="container">
+
+        <div class="title">
+            <h1>TETRIS</h1>
+            <i class="fa-solid fa-cubes"></i>
+        </div>
+        <ul class="tab-area">
+            <li class="tab active">LOGIN</li>
+            <li class="tab">REGISTER</li>
+        </ul>
+
+        <div class="form-container">
+
+            <form action="submit" id="login" class="tab-content active">
+                <label for="login-email">Email:</label>
+                <input class="text" type="email" id="login-email" name="login-email"
+                    placeholder="Enter your email address">
+                <span id="login-email-error" class="error"></span>
+                <label for="login-password">Password:</label>
+                <input class="text" type="password" id="login-password" name="login-password"
+                    placeholder="Enter your password">
+                <span id="login-password-error" class="error"></span>
+                <input class="form-button" type="submit" value="LOGIN">
+            </form>
+
+            <form action="submit" id="register" class="tab-content">
+                <label for="register-nickname">Nick Name:</label>
+                <input class="text" type="text" id="register-nickname" name="register-nickname"
+                    placeholder="Enter your nick name">
+                <span id="register-nickname-error" class="error"></span>
+                <label for="register-email">Email:</label>
+                <input class="text" type="email" id="register-email" name="register-email"
+                    placeholder="Enter your email address">
+                <span id="register-email-error" class="error"></span>
+                <label for="register-password">Password:</label>
+                <input class="text" type="password" id="register-password" name="register-password"
+                    placeholder="Enter your password">
+                <span id="register-password-error" class="error"></span>
+                <label for="password-confirm">Password Confirm:</label>
+                <input class="text" type="password" id="password-confirm" name="password-confirm"
+                    placeholder=" Enter your password again">
+                <span id="password-confirm-error" class="error"></span>
+                <input class="form-button" type="submit" value="REGISTER">
+            </form>
+        </div>
+    </main>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="login.js"></script>
+</body>
+
+</html>

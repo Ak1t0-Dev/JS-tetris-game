@@ -1,0 +1,133 @@
+/* ---------------- basic ---------------- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* --primary: #006284; */
+    --primary: #FCFAF2;
+    --black: #0C0C0C;
+    --gray: #787D7B;
+    --white: #FFFFFB;
+    --red: #B54434;
+}
+
+body {
+    font-family: "Titillium Web", sans-serif;
+    background-color: var(--primary);
+}
+
+/* ---------------- tetris.html ---------------- */
+canvas {
+    display: block;
+}
+
+/* ---------------- login.html ---------------- */
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: larger;
+}
+
+h1 {
+    margin: 1.5rem auto;
+}
+
+.title {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}
+
+.fa-cubes {
+    font-size: xx-large;
+}
+
+.form-container {
+    position: relative;
+    width: 400px;
+    height: 550px;
+    padding: 1rem;
+    border: 3px solid var(--black);
+    border-radius: 0.5rem;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+label {
+    display: block;
+    width: 100%;
+    margin: 0.5rem 0;
+}
+
+span {
+    display: inline-block;
+    font-size: small;
+    color: var(--red);
+}
+
+.text {
+    width: 100%;
+    border: none;
+    border-bottom: 2px solid var(--black);
+    background-color: var(--white);
+    color: var(--black);
+    padding: 0.5rem;
+    font-size: 1rem;
+}
+
+::placeholder {
+    color: var(--gray);
+  }
+
+.tab-area {
+    display: flex;
+    flex-direction: row;
+    list-style: none;
+}
+
+.tab {
+    padding: 1rem;
+    width: 150px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.tab.active {
+    background-color: var(--black);
+    color: var(--primary);
+}
+
+.form-button {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    -webkit-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    width: calc(100% - 2rem);
+    padding: 0.7rem;
+    font-size: large;
+    background-color: var(--primary);
+    color: var(--black);
+    border: 2px solid var(--black);
+    transition: all .5s;
+}
+
+.form-button:hover {
+    background-color: var(--black);
+    color: var(--primary);
+    border: 2px solid var(--primary);
+}
