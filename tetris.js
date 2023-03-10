@@ -109,7 +109,9 @@ const TETROMINO_SHAPES = [
 ];
 
 // a shape of tetro minoes
-let tetro_shape = Math.floor(Math.random() * (TETROMINO_SHAPES.length - 1)) + 1;
+// let tetro_shape = Math.floor(Math.random() * (TETROMINO_SHAPES.length - 1)) + 1;
+let shapesNum = TETROMINO_SHAPES.length - 1;
+let tetro_shape = referenceOrder();
 let tetroMino = TETROMINO_SHAPES[tetro_shape];
 
 // the start position of a tetro mino
@@ -132,9 +134,8 @@ setInterval(dropMino, drop_rate);
 // generate numbers of an array randomly with no duplicates
 // ----------------------------------------------------------------
 function generateRandomArr() {
-    let num = TETROMINO_SHAPES.length - 1;
-    let array = [...Array(num)].map((_, i) => i + 1);
-    for (let i = array.length - 1; i <= 0; i--) {
+    let array = [...Array(shapesNum)].map((_, i) => i + 1);
+    for (let i = array.length - 1; i >= 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [array[i], array[j]] = [array[j], array[i]];
     }
@@ -144,14 +145,14 @@ function generateRandomArr() {
 // ----------------------------------------------------------------
 // reference the order from an array
 // ----------------------------------------------------------------
-function referenceOrderArr() {
-    if (orderIndex === 0 || orderIndex === 6) {
+function referenceOrder() {
+    if (orderIndex === 0 || orderIndex === shapesNum) {
         orderIndex = 0;
         tetrominoOrder = generateRandomArr();
     }
-    let tetroMinoIndex = tetrominoOrder[orderIndex];
+    let tetrominoShape = tetrominoOrder[orderIndex];
     orderIndex++;
-    return tetroMinoIndex;
+    return tetrominoShape;
 }
 
 // ----------------------------------------------------------------
@@ -301,7 +302,8 @@ function dropMino() {
     } else {
         freezeMino();
         lineClear();
-        tetro_shape = Math.floor(Math.random() * (TETROMINO_SHAPES.length - 1)) + 1;
+        // tetro_shape = Math.floor(Math.random() * (TETROMINO_SHAPES.length - 1)) + 1;
+        tetro_shape = referenceOrder();
         tetroMino = TETROMINO_SHAPES[tetro_shape];
         tetro_x = START_X;
         tetro_y = (tetro_shape !== SHAPE_J_INDEX && tetro_shape !== SHAPE_L_INDEX) ? START_Y : START_Y_JL;
