@@ -20,8 +20,38 @@ body {
 }
 
 /* ---------------- tetris.html ---------------- */
-canvas {
-    display: block;
+#tetris-body {
+    height: 100vh;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+#canvas-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+#can {
+    background-color: lightcyan;
+}
+
+#info {
+    background-color: #35907f;
+}
+
+#controls {
+    border: 3px solid var(--black);
+    width: 250px;
+    margin: 0 1rem;
+    padding: 0.7rem 0 1rem 1rem;
+}
+
+#controls ul li {
+    list-style: none;
 }
 
 /* ---------------- login.html ---------------- */

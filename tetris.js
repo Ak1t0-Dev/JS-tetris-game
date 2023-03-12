@@ -9,11 +9,26 @@ const FIELD_W = BLOCK_SIZE * FIELD_COL;
 const FIELD_H = BLOCK_SIZE * FIELD_ROW;
 const SHAPE_J_INDEX = 6;
 const SHAPE_L_INDEX = 7;
-let drop_rate = 800;
+const GAME_OVER = "GAME OVER";
+const PAUSE = "PAUSE";
+const NEXT = "NEXT";
+const LINES = "LINES";
+const SCORE = "SCORE";
+let drop_rate = 700;
 let game_over = false;
+let lines = 0;
+let score = 0;
 
-let orderIndex = 0;
+let field = [];
+let orderIndex = -1;
 let tetrominoOrder = [];
+let tetrominoes = [];
+
+let tetrominoShape = 0;
+let nextTetrominoShape = 0;
+let tempTetrominoShape = 0;
+
+let paused = false;
 
 // ----------------------------------------------------------------
 // canvas 
@@ -23,15 +38,22 @@ let ctx = can.getContext("2d");
 
 can.width = FIELD_W;
 can.height = FIELD_H;
-can.style.border = "5px solid gray";
+ctx.strokeStyle = "blue";
+ctx.strokeRect(0, 0, FIELD_W, FIELD_H);
+can.style.border = "4px solid gray";
 
 // ----------------------------------------------------------------
-// tetris settings
+// info canvas 
 // ----------------------------------------------------------------
-// game over flag
+let infoCan = document.getElementById("info");
+let infoCtx = infoCan.getContext("2d");
+infoCan.width = FIELD_W;
+infoCan.height = FIELD_H;
+infoCan.style.border = "4px solid gray";
 
+// ----------------------------------------------------------------
 // initialize a field
-let field = [];
+// ----------------------------------------------------------------
 function init() {
     for (let y = 0; y < FIELD_ROW; y++) {
         field[y] = [];
@@ -111,8 +133,12 @@ const TETROMINO_SHAPES = [
 // a shape of tetro minoes
 // let tetro_shape = Math.floor(Math.random() * (TETROMINO_SHAPES.length - 1)) + 1;
 let shapesNum = TETROMINO_SHAPES.length - 1;
-let tetro_shape = referenceOrder();
+tetrominoes = referenceOrder();
+let tetro_shape = tetrominoes[0];
+let next_tetro_shape = tetrominoes[1];
 let tetroMino = TETROMINO_SHAPES[tetro_shape];
+let nextTetroMino = TETROMINO_SHAPES[next_tetro_shape];
+
 
 // the start position of a tetro mino
 const START_X = (FIELD_COL - TETROMINO_SIZE) / 2;
@@ -128,7 +154,9 @@ let tetro_y = (tetro_shape !== SHAPE_J_INDEX && tetro_shape !== SHAPE_L_INDEX) ?
 // ----------------------------------------------------------------
 init();
 draw();
-setInterval(dropMino, drop_rate);
+setInterval(() => {
+    if (!paused) dropMino()
+}, drop_rate);
 
 // ----------------------------------------------------------------
 // generate numbers of an array randomly with no duplicates
@@ -146,13 +174,35 @@ function generateRandomArr() {
 // reference the order from an array
 // ----------------------------------------------------------------
 function referenceOrder() {
-    if (orderIndex === 0 || orderIndex === shapesNum) {
-        orderIndex = 0;
+    // first execution
+    if (orderIndex === -1) {
         tetrominoOrder = generateRandomArr();
+        tempTetrominoShape = tetrominoOrder[shapesNum - 1];
+        orderIndex++;
     }
-    let tetrominoShape = tetrominoOrder[orderIndex];
-    orderIndex++;
-    return tetrominoShape;
+
+    // before the last index of the order array
+    if (orderIndex === shapesNum - 2) {
+        tetrominoShape = tetrominoOrder[orderIndex];
+        nextTetrominoShape = tempTetrominoShape;
+        tetrominoOrder = generateRandomArr();
+        tempTetrominoShape = tetrominoOrder[shapesNum - 1];
+        orderIndex++;
+        return [tetrominoShape, nextTetrominoShape];
+
+        // the last index of the order array
+    } else if (orderIndex === shapesNum - 1) {
+        tetrominoShape = nextTetrominoShape;
+        nextTetrominoShape = tetrominoOrder[0];
+        orderIndex = 0;
+        return [tetrominoShape, nextTetrominoShape];
+
+    } else {
+        tetrominoShape = tetrominoOrder[orderIndex];
+        nextTetrominoShape = tetrominoOrder[orderIndex + 1];
+        orderIndex++;
+        return [tetrominoShape, nextTetrominoShape];
+    }
 }
 
 // ----------------------------------------------------------------
@@ -163,6 +213,7 @@ function drawBlock(x, y, color) {
     let py = y * BLOCK_SIZE;
     ctx.fillStyle = TETROMINO_COLORS[color];
     ctx.fillRect(px, py, BLOCK_SIZE, BLOCK_SIZE);
+    ctx.lineWidth = 1;
     ctx.strokeStyle = "black";
     ctx.strokeRect(px, py, BLOCK_SIZE, BLOCK_SIZE);
 }
@@ -175,16 +226,17 @@ function draw() {
     drawMino();
 
     if (game_over) {
-        let s = "GAME OVER";
         ctx.font = "40px 'Titillium Web'";
-        let w = ctx.measureText(s).width;
+        let w = ctx.measureText(GAME_OVER).width;
         let x = FIELD_W / 2 - w / 2;
         let y = FIELD_H / 2 - 20;
         ctx.lineWidth = 4;
-        ctx.strokeText(s, x, y);
+        ctx.strokeText(GAME_OVER, x, y);
         ctx.fillStyle = "white";
-        ctx.fillText(s, x, y);
+        ctx.fillText(GAME_OVER, x, y);
     }
+
+    drawInfo();
 }
 
 // ----------------------------------------------------------------
@@ -212,6 +264,32 @@ function drawMino() {
             }
         }
     }
+}
+
+// ----------------------------------------------------------------
+// draw a next tetromino
+// ----------------------------------------------------------------
+function drawNextMino() {
+    for (let y = 0; y < TETROMINO_SIZE; y++) {
+        for (let x = 0; x < TETROMINO_SIZE; x++) {
+            if (nextTetroMino[y][x]) {
+                drawNewBlock(2 + x, 2 + y, next_tetro_shape);
+            }
+        }
+    }
+}
+
+// ----------------------------------------------------------------
+// draw a next block
+// ----------------------------------------------------------------
+function drawNewBlock(x, y, color) {
+    let px = x * BLOCK_SIZE;
+    let py = y * BLOCK_SIZE;
+    infoCtx.fillStyle = TETROMINO_COLORS[color];
+    infoCtx.fillRect(px, py, BLOCK_SIZE, BLOCK_SIZE);
+    infoCtx.lineWidth = 1;
+    infoCtx.strokeStyle = "black";
+    infoCtx.strokeRect(px, py, BLOCK_SIZE, BLOCK_SIZE);
 }
 
 // ----------------------------------------------------------------
@@ -269,7 +347,6 @@ function freezeMino() {
 // line clear
 // ----------------------------------------------------------------
 function lineClear() {
-    let lineCount = 0;
     for (let y = 0; y < FIELD_ROW; y++) {
         let boolean = true;
         for (let x = 0; x < FIELD_COL; x++) {
@@ -280,7 +357,7 @@ function lineClear() {
         }
         // 
         if (boolean) {
-            lineCount++;
+            lines++;
             for (let new_y = y; new_y > 0; new_y--) {
                 for (let new_x = 0; new_x < FIELD_COL; new_x++) {
                     field[new_y][new_x] = field[new_y - 1][new_x];
@@ -302,9 +379,11 @@ function dropMino() {
     } else {
         freezeMino();
         lineClear();
-        // tetro_shape = Math.floor(Math.random() * (TETROMINO_SHAPES.length - 1)) + 1;
-        tetro_shape = referenceOrder();
+        tetrominoes = referenceOrder();
+        tetro_shape = tetrominoes[0];
+        next_tetro_shape = tetrominoes[1];
         tetroMino = TETROMINO_SHAPES[tetro_shape];
+        nextTetroMino = TETROMINO_SHAPES[next_tetro_shape];
         tetro_x = START_X;
         tetro_y = (tetro_shape !== SHAPE_J_INDEX && tetro_shape !== SHAPE_L_INDEX) ? START_Y : START_Y_JL;
 
@@ -314,29 +393,90 @@ function dropMino() {
 }
 
 // ----------------------------------------------------------------
+// draw a field and a tetromino if game is over 
+// ----------------------------------------------------------------
+function drawPause() {
+    ctx.font = "40px 'Titillium Web'";
+    let w = ctx.measureText(PAUSE).width;
+    let x = FIELD_W / 2 - w / 2;
+    let y = FIELD_H / 2 - 20;
+    ctx.lineWidth = 4;
+    ctx.strokeText(PAUSE, x, y);
+    ctx.fillStyle = "white";
+    ctx.fillText(PAUSE, x, y);
+}
+
+// ----------------------------------------------------------------
+// draw a next tetromino, a score, and lines 
+// ----------------------------------------------------------------
+function drawInfo() {
+
+    infoCtx.clearRect(0, 0, 300, 600);
+    let width;
+    let textSize;
+    let textHeight;
+
+    drawNextMino();
+
+    infoCtx.fillStyle = "black";
+    infoCtx.font = "bold 40px 'Titillium Web'";
+
+    // NEXT
+    let str = NEXT;
+    textSize = infoCtx.measureText(str);
+    textHeight = textSize.actualBoundingBoxAscent + textSize.actualBoundingBoxDescent;
+    infoCtx.fillText(str, 20, textHeight + 10);
+    infoCtx.strokeStyle = "blue";
+    infoCtx.strokeRect(20, textHeight + 30, 200, 140);
+
+    // SCORE
+    str = SCORE;
+    infoCtx.fillText(str, 20, 300);
+    str += "" + score;
+    width = infoCtx.measureText(str).width;
+    infoCtx.fillText(str, 500 - width, 300);
+
+    // LINES
+    str = LINES;
+    width = infoCtx.measureText(str).width;
+    infoCtx.fillText(str, 20, 500);
+    infoCtx.fillText(lines, 110 + width, 500);
+}
+
+// ----------------------------------------------------------------
 // move tetro mino with keys
 // ----------------------------------------------------------------
 document.onkeydown = (e) => {
 
     if (game_over) return;
 
-    switch (e.key) {
-        case "ArrowDown": // speed up
-            if (detectCollision(0, 1)) tetro_y++;
-            break;
-        case "ArrowUp": // rotate
-            let rotateMino = rotate();
-            if (detectCollision(0, 1, rotateMino)) tetroMino = rotateMino;
-            break;
-        case "ArrowLeft": // move to left
-            if (detectCollision(-1, 0)) tetro_x--;
-            break;
-        case "ArrowRight": // move to right
-            if (detectCollision(1, 0)) tetro_x++;
-            break;
-        case "Shift": // fall down
-            break;
+    if (e.key === "Shift") {
+        paused = !paused;
+        if (paused) drawPause();
     }
 
-    draw();
+    if (!paused) {
+
+        switch (e.key) {
+            case "ArrowDown": // speed up
+                if (detectCollision(0, 1)) tetro_y++;
+                break;
+            case "ArrowUp": // rotate
+                let rotateMino = rotate();
+                if (detectCollision(0, 1, rotateMino)) tetroMino = rotateMino;
+                break;
+            case "ArrowLeft": // move to left
+                if (detectCollision(-1, 0)) tetro_x--;
+                break;
+            case "ArrowRight": // move to right
+                if (detectCollision(1, 0)) tetro_x++;
+                break;
+            case "Enter": // fall down
+                while (detectCollision(0, 1)) tetro_y++;
+                break;
+        }
+
+        draw();
+    }
 }
+
