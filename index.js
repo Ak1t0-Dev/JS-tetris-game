@@ -14,7 +14,6 @@ $('.tab').on('click', function () {
 // login
 // ---------------------------------------------------------------------- //
 $("#login").submit(function (event) {
-    event.preventDefault();
 
     // initialize error messages
     $("#login-email-error").text("");
@@ -25,21 +24,26 @@ $("#login").submit(function (event) {
 
     // there's no password confitm in login so give a password as a third parameter 
     if (!validate("#login", email, password, password)) {
-        return;
+        event.preventDefault();
+        return false;
     }
 
     let storageUsers = localStorage.getItem('tetrisUsers');
 
     if (!storageUsers) {
+        event.preventDefault();
         $("#login-email-error").text("An email address or a password is incorrect.");
     } else {
         let parsedStorageUsers = JSON.parse(storageUsers);
         for (let i = 0; i < parsedStorageUsers.length; i++) {
             if (parsedStorageUsers[i].email === email && parsedStorageUsers[i].password === password) {
-                return;
+                localStorage.setItem('localUser', JSON.stringify(parsedStorageUsers[i]));
+                return true;
             }
         }
+        event.preventDefault();
         $("#login-email-error").text("An email address or a password is incorrect.");
+        return false;
     }
 
 });
@@ -48,7 +52,6 @@ $("#login").submit(function (event) {
 // register
 // ---------------------------------------------------------------------- //
 $("#register").submit(function (event) {
-    event.preventDefault();
 
     // initialize error messages
     $("#register-email-error").text("");
@@ -60,7 +63,8 @@ $("#register").submit(function (event) {
     let passwordConfirm = $("#password-confirm").val();
 
     if (!validate("#register", email, password, passwordConfirm)) {
-        return;
+        event.preventDefault();
+        return false;
     }
 
     // store a user information to a local storage
@@ -68,23 +72,26 @@ $("#register").submit(function (event) {
     nickname = $('#register-nickname').val();
     email = $('#register-email').val();
     password = $('#register-password').val();
-    let user = { nickname: nickname, email: email, password: password };
+    let user = { nickname: nickname, email: email, password: password, score: "" };
     let usersArr = [];
     let storageUsers = localStorage.getItem('tetrisUsers');
 
     if (!storageUsers) {
         usersArr.push(user);
         localStorage.setItem('tetrisUsers', JSON.stringify(usersArr));
+        localStorage.setItem('localUser', JSON.stringify(user));
     } else {
         let parsedStorageUsers = JSON.parse(storageUsers);
         for (let i = 0; i < parsedStorageUsers.length; i++) {
             if (parsedStorageUsers[i].email === email) {
+                event.preventDefault();
                 $("#register-email-error").text("The email has already been registered. Try another email address.");
-                return;
+                return false;
             }
         }
         parsedStorageUsers.push(user);
         localStorage.setItem('tetrisUsers', JSON.stringify(parsedStorageUsers));
+        localStorage.setItem('localUser', JSON.stringify(user));
     }
 
 });

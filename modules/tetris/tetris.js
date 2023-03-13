@@ -14,6 +14,7 @@ const PAUSE = "PAUSE";
 const NEXT = "NEXT";
 const LINES = "LINES";
 const SCORE = "SCORE";
+const PADDING = 20;
 let drop_rate = 700;
 let game_over = false;
 let lines = 0;
@@ -43,13 +44,13 @@ ctx.strokeRect(0, 0, FIELD_W, FIELD_H);
 can.style.border = "4px solid gray";
 
 // ----------------------------------------------------------------
-// info canvas 
+// canvas for a next tetromino, score, lines
 // ----------------------------------------------------------------
 let infoCan = document.getElementById("info");
 let infoCtx = infoCan.getContext("2d");
 infoCan.width = FIELD_W;
 infoCan.height = FIELD_H;
-infoCan.style.border = "4px solid gray";
+// infoCan.style.border = "4px solid gray";
 
 // ----------------------------------------------------------------
 // initialize a field
@@ -62,6 +63,9 @@ function init() {
         }
     }
 }
+
+// a point of clearing lines
+const POINTS = [100, 300, 500, 800];
 
 // a color of tetro minoes
 const TETROMINO_COLORS = [
@@ -273,7 +277,7 @@ function drawNextMino() {
     for (let y = 0; y < TETROMINO_SIZE; y++) {
         for (let x = 0; x < TETROMINO_SIZE; x++) {
             if (nextTetroMino[y][x]) {
-                drawNewBlock(2 + x, 2 + y, next_tetro_shape);
+                drawNewBlock(2.5 + x, 2.5 + y, next_tetro_shape);
             }
         }
     }
@@ -347,6 +351,7 @@ function freezeMino() {
 // line clear
 // ----------------------------------------------------------------
 function lineClear() {
+    let clearingLines = 0;
     for (let y = 0; y < FIELD_ROW; y++) {
         let boolean = true;
         for (let x = 0; x < FIELD_COL; x++) {
@@ -355,8 +360,9 @@ function lineClear() {
                 break;
             }
         }
-        // 
+
         if (boolean) {
+            clearingLines++;
             lines++;
             for (let new_y = y; new_y > 0; new_y--) {
                 for (let new_x = 0; new_x < FIELD_COL; new_x++) {
@@ -365,7 +371,18 @@ function lineClear() {
             }
         }
     }
+    if (clearingLines) {
+        calculateScore(clearingLines);
+    }
 }
+
+// ----------------------------------------------------------------
+// calculating a score
+// ----------------------------------------------------------------
+function calculateScore(clearingLines) {
+    score += POINTS[clearingLines - 1];
+}
+
 
 // ----------------------------------------------------------------
 // drop a tetromino
@@ -412,39 +429,42 @@ function drawPause() {
 function drawInfo() {
 
     infoCtx.clearRect(0, 0, 300, 600);
-    let width;
     let textSize;
     let textHeight;
 
-    drawNextMino();
-
-    infoCtx.fillStyle = "black";
     infoCtx.font = "bold 40px 'Titillium Web'";
 
     // NEXT
     let str = NEXT;
+    infoCtx.fillStyle = "black";
     textSize = infoCtx.measureText(str);
     textHeight = textSize.actualBoundingBoxAscent + textSize.actualBoundingBoxDescent;
-    infoCtx.fillText(str, 20, textHeight + 10);
-    infoCtx.strokeStyle = "blue";
-    infoCtx.strokeRect(20, textHeight + 30, 200, 140);
+    infoCtx.fillText(str, PADDING, textHeight + 10);
+    infoCtx.lineWidth = 3;
+    infoCtx.strokeStyle = "gray";
+    infoCtx.fillStyle = "#fff9d8";
+    infoCtx.fillRect(PADDING, textHeight + 30, 220, 150);
+    infoCtx.strokeRect(PADDING, textHeight + 30, 220, 150);
+    drawNextMino();
 
     // SCORE
     str = SCORE;
-    infoCtx.fillText(str, 20, 300);
-    str += "" + score;
+    infoCtx.fillStyle = "black";
+    infoCtx.fillText(str, PADDING, 300);
     width = infoCtx.measureText(str).width;
-    infoCtx.fillText(str, 500 - width, 300);
+    infoCtx.fillText(score, PADDING, 350);
 
     // LINES
     str = LINES;
+    infoCtx.fillStyle = "black";
     width = infoCtx.measureText(str).width;
-    infoCtx.fillText(str, 20, 500);
-    infoCtx.fillText(lines, 110 + width, 500);
+    infoCtx.fillText(str, PADDING, 500);
+    infoCtx.fillText(lines, PADDING, 550);
+
 }
 
 // ----------------------------------------------------------------
-// move tetro mino with keys
+// move a tetro mino with keys
 // ----------------------------------------------------------------
 document.onkeydown = (e) => {
 
