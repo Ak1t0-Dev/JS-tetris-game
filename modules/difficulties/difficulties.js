@@ -1,8 +1,12 @@
-let showUser = document.querySelectorAll('.difficulties-button');
+let showUser = document.querySelector('#show-user');
+let difficulties = document.querySelectorAll('.difficulties-button');
 
-showUser.forEach(item => {
+difficulties.forEach(item => {
     item.addEventListener('click', chooseDifficulties)
 })
+
+showUser.innerHTML = "Hi! " + JSON.parse(localStorage.getItem('loginUser')).nickname;
+
 
 function chooseDifficulties(event) {
     let difficulty = event.target.value;

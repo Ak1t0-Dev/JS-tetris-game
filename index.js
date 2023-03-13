@@ -37,7 +37,7 @@ $("#login").submit(function (event) {
         let parsedStorageUsers = JSON.parse(storageUsers);
         for (let i = 0; i < parsedStorageUsers.length; i++) {
             if (parsedStorageUsers[i].email === email && parsedStorageUsers[i].password === password) {
-                localStorage.setItem('localUser', JSON.stringify(parsedStorageUsers[i]));
+                localStorage.setItem('loginUser', JSON.stringify(parsedStorageUsers[i]));
                 return true;
             }
         }
@@ -79,7 +79,7 @@ $("#register").submit(function (event) {
     if (!storageUsers) {
         usersArr.push(user);
         localStorage.setItem('tetrisUsers', JSON.stringify(usersArr));
-        localStorage.setItem('localUser', JSON.stringify(user));
+        localStorage.setItem('loginUser', JSON.stringify(user));
     } else {
         let parsedStorageUsers = JSON.parse(storageUsers);
         for (let i = 0; i < parsedStorageUsers.length; i++) {
@@ -91,7 +91,7 @@ $("#register").submit(function (event) {
         }
         parsedStorageUsers.push(user);
         localStorage.setItem('tetrisUsers', JSON.stringify(parsedStorageUsers));
-        localStorage.setItem('localUser', JSON.stringify(user));
+        localStorage.setItem('loginUser', JSON.stringify(user));
     }
 
 });
