@@ -24,13 +24,16 @@ body {
 /* ---------------- tetris.html ---------------- */
 #tetris-body {
     height: 100vh;
+}
+
+#canvas-container {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
 }
 
-#canvas-container {
+.board {
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -42,6 +45,11 @@ body {
 }
 
 #info {
+    background-color: var(--primary);
+    border: 4px solid var(--primary);
+}
+
+#timer {
     background-color: var(--primary);
     border: 4px solid var(--primary);
 }

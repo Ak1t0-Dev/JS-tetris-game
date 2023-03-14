@@ -9,16 +9,24 @@ const FIELD_W = BLOCK_SIZE * FIELD_COL;
 const FIELD_H = BLOCK_SIZE * FIELD_ROW;
 const SHAPE_J_INDEX = 6;
 const SHAPE_L_INDEX = 7;
+const TIMER_W = 948;
+const TIMER_H = 60;
 const GAME_OVER = "GAME OVER";
 const PAUSE = "PAUSE";
 const NEXT = "NEXT";
 const LINES = "LINES";
 const SCORE = "SCORE";
+const TIMER = "TIMER";
+const TIMER_LIMIT = 10;
+const DIFFICULTY_DIFFICULT = "DIFFICULT";
+const DIFFICULTY_NORMAL = "NORMAL";
+const DIFFICULTY_EASY = "EASY";
 const PADDING = 20;
-let drop_rate = 700;
+let drop_rate = 600;
 let game_over = false;
 let lines = 0;
 let score = 0;
+let timer_end = 0;
 
 let field = [];
 let orderIndex = -1;
@@ -43,6 +51,15 @@ ctx.strokeStyle = "blue";
 ctx.strokeRect(0, 0, FIELD_W, FIELD_H);
 can.style.border = "4px solid gray";
 
+
+// ----------------------------------------------------------------
+// canvas for timer
+// ----------------------------------------------------------------
+let timerCan = document.getElementById("timer");
+let timerCtx = timerCan.getContext("2d");
+timerCan.width = TIMER_W;
+timerCan.height = TIMER_H;
+
 // ----------------------------------------------------------------
 // canvas for a next tetromino, score, lines
 // ----------------------------------------------------------------
@@ -50,7 +67,6 @@ let infoCan = document.getElementById("info");
 let infoCtx = infoCan.getContext("2d");
 infoCan.width = FIELD_W;
 infoCan.height = FIELD_H;
-// infoCan.style.border = "4px solid gray";
 
 // ----------------------------------------------------------------
 // initialize a field
@@ -156,11 +172,31 @@ let tetro_y = (tetro_shape !== SHAPE_J_INDEX && tetro_shape !== SHAPE_L_INDEX) ?
 // ----------------------------------------------------------------
 // call functions
 // ----------------------------------------------------------------
+setDifficulty();
+setTimer();
 init();
 draw();
 setInterval(() => {
     if (!paused) dropMino()
 }, drop_rate);
+
+// ----------------------------------------------------------------
+// set difficulty from a given parameter
+// ----------------------------------------------------------------
+function setDifficulty() {
+    const params = new URLSearchParams(window.location.search);
+    const difficulty = params.get('difficulty');
+    switch (difficulty) {
+        case "DIFFICULT":
+            drop_rate = 300;
+            break;
+        case "EASY":
+            drop_rate = 800;
+            break;
+        default:
+            break;
+    }
+}
 
 // ----------------------------------------------------------------
 // generate numbers of an array randomly with no duplicates
@@ -227,22 +263,28 @@ function drawBlock(x, y, color) {
 // ----------------------------------------------------------------
 function draw() {
     drawField();
+    drawInfo();
     drawMino();
 
     if (game_over) {
-        ctx.font = "40px 'Titillium Web'";
-        let w = ctx.measureText(GAME_OVER).width;
-        let x = FIELD_W / 2 - w / 2;
-        let y = FIELD_H / 2 - 20;
-        ctx.lineWidth = 4;
-        ctx.strokeText(GAME_OVER, x, y);
-        ctx.fillStyle = "white";
-        ctx.fillText(GAME_OVER, x, y);
+        drawGameOver();
     }
-
-    drawInfo();
 }
 
+// ----------------------------------------------------------------
+// draw game over
+// ----------------------------------------------------------------
+function drawGameOver(timerId) {
+    clearInterval(timerId);
+    ctx.font = "40px 'Titillium Web'";
+    let w = ctx.measureText(GAME_OVER).width;
+    let x = FIELD_W / 2 - w / 2;
+    let y = FIELD_H / 2 - 20;
+    ctx.lineWidth = 4;
+    ctx.strokeText(GAME_OVER, x, y);
+    ctx.fillStyle = "white";
+    ctx.fillText(GAME_OVER, x, y);
+}
 // ----------------------------------------------------------------
 // draw a field
 // ----------------------------------------------------------------
@@ -383,6 +425,44 @@ function calculateScore(clearingLines) {
     score += POINTS[clearingLines - 1];
 }
 
+// ----------------------------------------------------------------
+// set timer
+// ----------------------------------------------------------------
+function setTimer() {
+    timer_end = TIMER_LIMIT * 60 * 1000;
+    timerCtx.font = "bold 40px 'Titillium Web'";
+    timerCtx.fillStyle = "black";
+    let textSize = timerCtx.measureText(TIMER);
+    let width = textSize.width;
+    let textHeight = textSize.actualBoundingBoxAscent + textSize.actualBoundingBoxDescent;
+    drawTimer(width, textHeight);
+
+    const timerId = setInterval(() => {
+        if (!paused && !game_over) {
+            timerCtx.clearRect(0, 0, TIMER_W, TIMER_H);
+            if (timer_end > 0) {
+                timer_end = timer_end - 1000;
+            } else {
+                game_over = true;
+                drawGameOver(timerId);
+            }
+            drawTimer(width, textHeight);
+        }
+    }, 1000);
+}
+
+// ----------------------------------------------------------------
+// draw timer
+// ----------------------------------------------------------------
+function drawTimer(width, height) {
+    // calculate the minutes and seconds
+    const minutes = Math.floor(timer_end / (60 * 1000));
+    const seconds = (timer_end / 1000) % 60;
+    // format the time as a string 00:00
+    const timeString = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
+    timerCtx.fillText(TIMER, PADDING, height + 20);
+    timerCtx.fillText(timeString, width + 40, height + 20);
+}
 
 // ----------------------------------------------------------------
 // drop a tetromino
@@ -450,17 +530,14 @@ function drawInfo() {
     // SCORE
     str = SCORE;
     infoCtx.fillStyle = "black";
-    infoCtx.fillText(str, PADDING, 300);
-    width = infoCtx.measureText(str).width;
-    infoCtx.fillText(score, PADDING, 350);
+    infoCtx.fillText(str, PADDING, 280);
+    infoCtx.fillText(score, PADDING, 330);
 
     // LINES
     str = LINES;
     infoCtx.fillStyle = "black";
-    width = infoCtx.measureText(str).width;
-    infoCtx.fillText(str, PADDING, 500);
-    infoCtx.fillText(lines, PADDING, 550);
-
+    infoCtx.fillText(str, PADDING, 400);
+    infoCtx.fillText(lines, PADDING, 450);
 }
 
 // ----------------------------------------------------------------
